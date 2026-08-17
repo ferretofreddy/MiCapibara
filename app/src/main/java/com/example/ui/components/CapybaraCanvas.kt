@@ -35,11 +35,13 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import com.example.model.CapybaraBackground
 import com.example.model.CapybaraColor
+import com.example.model.CapybaraDrink
 import com.example.model.CapybaraGlasses
 import com.example.model.CapybaraHat
 import com.example.model.CapybaraShirt
 import com.example.model.CapybaraShoes
 import com.example.model.CapybaraState
+import com.example.model.CapybaraVehicle
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -122,6 +124,8 @@ private fun DrawScope.drawBackgroundScene(
     CapybaraBackground.FOREST -> drawForestBackground(w, h, animTime)
     CapybaraBackground.MEADOW -> drawMeadowBackground(w, h, animTime)
     CapybaraBackground.SUNSET -> drawSunsetBackground(w, h, animTime)
+    CapybaraBackground.RAINFOREST -> drawRainforestBackground(w, h, animTime)
+    CapybaraBackground.SPACE -> drawSpaceBackground(w, h, animTime)
   }
 }
 
@@ -422,6 +426,176 @@ private fun DrawScope.drawSunsetBackground(w: Float, h: Float, anim: Float) {
   drawPath(groundSunset, Color(0xFF21092F))
 }
 
+private fun DrawScope.drawRainforestBackground(w: Float, h: Float, anim: Float) {
+  // Cielo y canopia verde esmeralda
+  drawRect(
+    brush = Brush.verticalGradient(
+      colors = listOf(Color(0xFF004D40), Color(0xFF00796B), Color(0xFF2E7D32), Color(0xFF81C784)),
+      startY = 0f,
+      endY = h * 0.75f
+    ),
+    size = Size(w, h)
+  )
+
+  // Rayos de sol tropicales
+  for (i in 0..4) {
+    val rayX = w * (0.15f + i * 0.20f)
+    val rayPath = Path().apply {
+      moveTo(rayX, 0f)
+      lineTo(rayX + 30f, 0f)
+      lineTo(rayX - 30f, h * 0.7f)
+      lineTo(rayX - 70f, h * 0.7f)
+      close()
+    }
+    drawPath(rayPath, Color(0xFFFFEB3B).copy(alpha = 0.12f))
+  }
+
+  // Hojas gigantes tropicales de fondo (Monstera y palmas)
+  val leafColorDark = Color(0xFF1B5E20)
+  val leafColorMid = Color(0xFF2E7D32)
+  val leafColorLight = Color(0xFF43A047)
+
+  // Capa lejana de vegetación
+  for (x in 0..6) {
+    val px = x * (w / 5.5f)
+    drawCircle(leafColorDark.copy(alpha = 0.85f), radius = w * 0.16f, center = Offset(px, h * 0.38f))
+  }
+
+  // Hojas de monstera y palmeras colgantes
+  for (i in 0..4) {
+    val lx = w * (0.05f + i * 0.25f)
+    val sway = sin(anim * 0.03f + i) * 6f
+    val leafPath = Path().apply {
+      moveTo(lx, 0f)
+      quadraticBezierTo(lx + 40f + sway, h * 0.18f, lx + 20f, h * 0.32f)
+      quadraticBezierTo(lx - 20f, h * 0.20f, lx, 0f)
+      close()
+    }
+    drawPath(leafPath, if (i % 2 == 0) leafColorMid else leafColorLight)
+    drawPath(leafPath, Color(0xFF0A3311), style = Stroke(width = 1.5f))
+  }
+
+  // Flores de hibisco exóticas y orquídeas
+  val flowerPositions = listOf(
+    Offset(w * 0.12f, h * 0.46f),
+    Offset(w * 0.88f, h * 0.42f),
+    Offset(w * 0.75f, h * 0.58f),
+    Offset(w * 0.20f, h * 0.62f)
+  )
+  flowerPositions.forEachIndexed { idx, pos ->
+    val fColor = if (idx % 2 == 0) Color(0xFFFF1744) else Color(0xFFFF9100)
+    for (petal in 0..4) {
+      val angle = (petal * 72f) * (Math.PI / 180f)
+      drawCircle(fColor, radius = 9f, center = Offset(pos.x + cos(angle).toFloat() * 11f, pos.y + sin(angle).toFloat() * 11f))
+    }
+    drawCircle(Color(0xFFFFEA00), radius = 6f, center = pos)
+  }
+
+  // Mariposas Morpho azules brillantes en la selva
+  val bFlyX = w * 0.32f + sin(anim * 0.04f) * 20f
+  val bFlyY = h * 0.35f + cos(anim * 0.05f) * 12f
+  drawButterfly(Offset(bFlyX, bFlyY), Color(0xFF00E5FF))
+
+  // Suelo selvático musgoso con pequeñas hojas
+  val groundJungle = Path().apply {
+    moveTo(0f, h * 0.66f)
+    cubicTo(w * 0.35f, h * 0.63f, w * 0.65f, h * 0.69f, w, h * 0.65f)
+    lineTo(w, h)
+    lineTo(0f, h)
+    close()
+  }
+  drawPath(groundJungle, Color(0xFF1B3815))
+}
+
+private fun DrawScope.drawSpaceBackground(w: Float, h: Float, anim: Float) {
+  // Espacio profundo con gradiente cósmico (azul marino oscuro, violeta y negro)
+  drawRect(
+    brush = Brush.verticalGradient(
+      colors = listOf(Color(0xFF050518), Color(0xFF1A0A3A), Color(0xFF28104E), Color(0xFF0B132B)),
+      startY = 0f,
+      endY = h
+    ),
+    size = Size(w, h)
+  )
+
+  // Nebulosas brillantes cósmicas
+  drawCircle(
+    brush = Brush.radialGradient(
+      colors = listOf(Color(0xFFE040FB).copy(alpha = 0.28f), Color.Transparent),
+      center = Offset(w * 0.25f, h * 0.28f),
+      radius = w * 0.35f
+    ),
+    radius = w * 0.35f,
+    center = Offset(w * 0.25f, h * 0.28f)
+  )
+  drawCircle(
+    brush = Brush.radialGradient(
+      colors = listOf(Color(0xFF00E5FF).copy(alpha = 0.25f), Color.Transparent),
+      center = Offset(w * 0.78f, h * 0.42f),
+      radius = w * 0.30f
+    ),
+    radius = w * 0.30f,
+    center = Offset(w * 0.78f, h * 0.42f)
+  )
+
+  // Planeta con anillos tipo Saturno
+  val saturnPos = Offset(w * 0.82f, h * 0.20f)
+  drawCircle(Color(0xFFFFB74D), radius = 24f, center = saturnPos)
+  drawCircle(Color(0xFFFF9800), radius = 20f, center = Offset(saturnPos.x - 3f, saturnPos.y - 3f))
+  // Anillo inclinado
+  val ring = Path().apply {
+    addOval(Rect(saturnPos.x - 44f, saturnPos.y - 12f, saturnPos.x + 44f, saturnPos.y + 12f))
+  }
+  rotate(degrees = -25f, pivot = saturnPos) {
+    drawPath(ring, Color(0xFFFFE082).copy(alpha = 0.75f), style = Stroke(width = 6f))
+    drawPath(ring, Color(0xFFFFD54F), style = Stroke(width = 2f))
+  }
+
+  // Planeta azul distante / Luna
+  val moonPos = Offset(w * 0.18f, h * 0.16f)
+  drawCircle(Color(0xFF80D8FF), radius = 16f, center = moonPos)
+  drawCircle(Color(0xFF40C4FF).copy(alpha = 0.6f), radius = 4f, center = Offset(moonPos.x - 5f, moonPos.y - 3f))
+
+  // Constelaciones y estrellas titilantes
+  val spaceStars = listOf(
+    Offset(w * 0.08f, h * 0.08f),
+    Offset(w * 0.38f, h * 0.06f),
+    Offset(w * 0.50f, h * 0.15f),
+    Offset(w * 0.62f, h * 0.09f),
+    Offset(w * 0.92f, h * 0.07f),
+    Offset(w * 0.12f, h * 0.32f),
+    Offset(w * 0.42f, h * 0.28f),
+    Offset(w * 0.68f, h * 0.32f),
+    Offset(w * 0.30f, h * 0.45f),
+    Offset(w * 0.88f, h * 0.52f)
+  )
+  spaceStars.forEachIndexed { index, starPos ->
+    val blink = (sin(anim * 0.07f + index * 1.3f) + 1f) * 0.5f
+    val starColor = when (index % 4) {
+      0 -> Color(0xFFFFF59D)
+      1 -> Color(0xFF80D8FF)
+      2 -> Color(0xFFFF80AB)
+      else -> Color.White
+    }
+    drawStar(starPos, size = 4f + blink * 5f, color = starColor)
+  }
+
+  // Superficie lunar cósmica con cráteres
+  val groundMoon = Path().apply {
+    moveTo(0f, h * 0.68f)
+    cubicTo(w * 0.35f, h * 0.65f, w * 0.7f, h * 0.70f, w, h * 0.67f)
+    lineTo(w, h)
+    lineTo(0f, h)
+    close()
+  }
+  drawPath(groundMoon, Color(0xFF37474F))
+
+  // Cráteres en el suelo lunar
+  drawOval(Color(0xFF263238), topLeft = Offset(w * 0.14f, h * 0.75f), size = Size(36f, 12f))
+  drawOval(Color(0xFF263238), topLeft = Offset(w * 0.72f, h * 0.78f), size = Size(50f, 15f))
+  drawOval(Color(0xFF263238), topLeft = Offset(w * 0.45f, h * 0.86f), size = Size(40f, 11f))
+}
+
 // -------------------------------------------------------------
 // DIBUJO DEL CAPIBARA (ESTILO CARTOON CLÁSICO SENTADO)
 // -------------------------------------------------------------
@@ -442,6 +616,11 @@ private fun DrawScope.drawCapybaraCharacter(
       topLeft = Offset(centerX - 110f, centerY + 86f),
       size = Size(220f, 32f)
     )
+
+    // Vehículo seleccionado (detrás o al lado del capibara)
+    if (state.vehicle != CapybaraVehicle.NONE) {
+      drawVehicle(state.vehicle, centerX - 105f, centerY + 45f, outlineColor, strokeW)
+    }
 
     // 2. Capa de superhéroe trasera (si está seleccionada)
     if (state.shirt == CapybaraShirt.SUPERHERO) {
@@ -524,7 +703,12 @@ private fun DrawScope.drawCapybaraCharacter(
       drawHat(state.hat, centerX, centerY)
     }
 
-    // 15. Efecto de felicidad (corazones/estrellitas si está alegre)
+    // 15. Bebida refrescante junto al capibara en el suelo
+    if (state.drink != CapybaraDrink.NONE) {
+      drawDrink(state.drink, centerX + 78f, centerY + 62f, outlineColor, strokeW)
+    }
+
+    // 16. Efecto de felicidad (corazones/estrellitas si está alegre)
     if (state.isHappy || state.happinessCount > 1) {
       drawHappySparks(centerX, centerY)
     }
@@ -925,6 +1109,36 @@ private fun DrawScope.drawGlasses(glasses: CapybaraGlasses, cx: Float, cy: Float
       drawPath(tubePath, Color(0xFFFFEA00), style = Stroke(width = 6f, cap = StrokeCap.Round))
       drawPath(tubePath, Color(0xFF2C1810), style = Stroke(width = 1.5f))
     }
+
+    CapybaraGlasses.BUTTERFLY_GLASSES -> {
+      // Gafas con alas de mariposa violetas/rosas
+      val wingPath = Path().apply {
+        moveTo(eyePos.x - 12f, eyePos.y)
+        cubicTo(eyePos.x - 28f, eyePos.y - 24f, eyePos.x + 8f, eyePos.y - 30f, eyePos.x + 22f, eyePos.y - 12f)
+        cubicTo(eyePos.x + 30f, eyePos.y + 4f, eyePos.x + 14f, eyePos.y + 22f, eyePos.x - 2f, eyePos.y + 16f)
+        cubicTo(eyePos.x - 18f, eyePos.y + 20f, eyePos.x - 26f, eyePos.y + 8f, eyePos.x - 12f, eyePos.y)
+        close()
+      }
+      drawPath(wingPath, Color(0xFFE040FB).copy(alpha = 0.55f))
+      drawPath(wingPath, Color(0xFF7B1FA2), style = Stroke(width = 3.5f))
+      drawCircle(Color(0xFF00E5FF), radius = 3.5f, center = Offset(eyePos.x + 6f, eyePos.y - 10f))
+      drawCircle(Color(0xFFFFEA00), radius = 3.5f, center = Offset(eyePos.x + 12f, eyePos.y + 6f))
+      drawLine(Color(0xFF7B1FA2), Offset(eyePos.x - 14f, eyePos.y), Offset(cx - 30f, cy - 80f), strokeWidth = 3f)
+    }
+
+    CapybaraGlasses.MOON_GLASSES -> {
+      // Gafas místicas con montura en media luna dorada
+      val moonPath = Path().apply {
+        moveTo(eyePos.x + 18f, eyePos.y - 18f)
+        cubicTo(eyePos.x - 18f, eyePos.y - 18f, eyePos.x - 18f, eyePos.y + 18f, eyePos.x + 18f, eyePos.y + 18f)
+        cubicTo(eyePos.x + 2f, eyePos.y + 10f, eyePos.x + 2f, eyePos.y - 10f, eyePos.x + 18f, eyePos.y - 18f)
+        close()
+      }
+      drawPath(moonPath, Color(0xFF80D8FF).copy(alpha = 0.55f))
+      drawPath(moonPath, Color(0xFFFFD700), style = Stroke(width = 3.5f))
+      drawStar(Offset(eyePos.x + 22f, eyePos.y - 10f), 6f, Color(0xFFFFD700))
+      drawLine(Color(0xFFFFD700), Offset(eyePos.x - 12f, eyePos.y), Offset(cx - 30f, cy - 80f), strokeWidth = 3f)
+    }
   }
 }
 
@@ -1068,6 +1282,46 @@ private fun DrawScope.drawHat(hat: CapybaraHat, cx: Float, cy: Float) {
       drawPath(beretPath, outline, style = Stroke(width = 3.5f))
       drawLine(Color(0xFF880E4F), Offset(headTop.x, headTop.y - 20f), Offset(headTop.x, headTop.y - 26f), strokeWidth = 3.5f, cap = StrokeCap.Round)
     }
+
+    CapybaraHat.COWBOY -> {
+      // Sombrero vaquero de cuero marrón con ala curvada
+      val cowboyBrim = Path().apply {
+        moveTo(headTop.x - 48f, headTop.y - 4f)
+        cubicTo(headTop.x - 20f, headTop.y + 8f, headTop.x + 20f, headTop.y + 8f, headTop.x + 48f, headTop.y - 4f)
+        cubicTo(headTop.x + 38f, headTop.y + 12f, headTop.x - 38f, headTop.y + 12f, headTop.x - 48f, headTop.y - 4f)
+        close()
+      }
+      val cowboyCrown = Path().apply {
+        moveTo(headTop.x - 24f, headTop.y + 2f)
+        cubicTo(headTop.x - 22f, headTop.y - 30f, headTop.x - 12f, headTop.y - 42f, headTop.x, headTop.y - 36f)
+        cubicTo(headTop.x + 12f, headTop.y - 42f, headTop.x + 22f, headTop.y - 30f, headTop.x + 24f, headTop.y + 2f)
+        close()
+      }
+      drawPath(cowboyCrown, Color(0xFF795548))
+      drawPath(cowboyCrown, outline, style = Stroke(width = 3.5f))
+      drawPath(cowboyBrim, Color(0xFF8D6E63))
+      drawPath(cowboyBrim, outline, style = Stroke(width = 3.5f))
+      // Cinta marrón oscuro con estrella de sheriff
+      drawRect(Color(0xFF3E2723), topLeft = Offset(headTop.x - 22f, headTop.y - 8f), size = Size(44f, 7f))
+      drawStar(Offset(headTop.x, headTop.y - 4f), 5f, Color(0xFFFFD700))
+    }
+
+    CapybaraHat.STAR_TIARA -> {
+      // Tiara dorada brillante con estrellas
+      val tiaraBand = Path().apply {
+        moveTo(headTop.x - 30f, headTop.y + 4f)
+        cubicTo(headTop.x - 10f, headTop.y - 2f, headTop.x + 10f, headTop.y - 2f, headTop.x + 30f, headTop.y + 4f)
+      }
+      drawPath(tiaraBand, Color(0xFFFFD700), style = Stroke(width = 5f, cap = StrokeCap.Round))
+      drawPath(tiaraBand, outline, style = Stroke(width = 1.5f, cap = StrokeCap.Round))
+
+      // 3 estrellas relucientes montadas en la tiara
+      drawStar(Offset(headTop.x - 18f, headTop.y - 12f), 8f, Color(0xFFFFEB3B))
+      drawStar(Offset(headTop.x, headTop.y - 20f), 12f, Color(0xFFFFD700))
+      drawStar(Offset(headTop.x + 18f, headTop.y - 12f), 8f, Color(0xFFFFEB3B))
+
+      drawCircle(Color(0xFF00E5FF), radius = 3f, center = Offset(headTop.x, headTop.y - 20f))
+    }
   }
 }
 
@@ -1106,6 +1360,8 @@ private fun getShoeColor(shoes: CapybaraShoes): Color {
     CapybaraShoes.RED_BOOTS -> Color(0xFFE53935)
     CapybaraShoes.GOLD_SHOES -> Color(0xFFFFD700)
     CapybaraShoes.ROLLER_SKATES -> Color(0xFFFF4081)
+    CapybaraShoes.BEACH_SANDALS -> Color(0xFF00E5FF)
+    CapybaraShoes.SPACE_BOOTS -> Color(0xFFECEFF1)
     CapybaraShoes.NONE -> Color.Transparent
   }
 }
@@ -1138,6 +1394,283 @@ private fun DrawScope.drawSingleShoe(
   } else if (shoes == CapybaraShoes.ROLLER_SKATES) {
     drawCircle(Color(0xFF00E5FF), radius = 4f, center = Offset(pos.x + 4f, pos.y + 17f))
     drawCircle(Color(0xFFFFEA00), radius = 4f, center = Offset(pos.x + width - 4f, pos.y + 17f))
+  } else if (shoes == CapybaraShoes.BEACH_SANDALS) {
+    // Tiras en V de chancla veraniega
+    drawLine(Color(0xFFFF4081), Offset(pos.x + 2f, pos.y + 2f), Offset(pos.x + width * 0.5f, pos.y + 12f), strokeWidth = 3f, cap = StrokeCap.Round)
+    drawLine(Color(0xFFFF4081), Offset(pos.x + width - 2f, pos.y + 2f), Offset(pos.x + width * 0.5f, pos.y + 12f), strokeWidth = 3f, cap = StrokeCap.Round)
+  } else if (shoes == CapybaraShoes.SPACE_BOOTS) {
+    // Franja metálica y luz LED azul de bota espacial
+    drawRect(Color(0xFF90A4AE), topLeft = Offset(pos.x, pos.y + 10f), size = Size(width, 4f))
+    drawCircle(Color(0xFF00E5FF), radius = 2.5f, center = Offset(pos.x + width * 0.5f, pos.y + 5f))
+  }
+}
+
+// -------------------------------------------------------------
+// BEBIDAS REFRESCANTES
+// -------------------------------------------------------------
+private fun DrawScope.drawDrink(
+  drink: CapybaraDrink,
+  cx: Float,
+  cy: Float,
+  outline: Color,
+  strokeW: Float
+) {
+  when (drink) {
+    CapybaraDrink.NONE -> {}
+
+    CapybaraDrink.ORANGE_JUICE -> {
+      // Vaso de jugo de naranja con rodaja y pajilla
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 14f, cy + 20f), size = Size(28f, 10f))
+      val glassPath = Path().apply {
+        moveTo(cx - 10f, cy)
+        lineTo(cx + 10f, cy)
+        lineTo(cx + 8f, cy + 24f)
+        lineTo(cx - 8f, cy + 24f)
+        close()
+      }
+      drawPath(glassPath, Color(0xFFFF9800))
+      drawPath(glassPath, outline, style = Stroke(width = strokeW * 0.8f))
+      // Pajilla a rayas
+      drawLine(Color(0xFFE53935), Offset(cx - 2f, cy + 15f), Offset(cx - 8f, cy - 14f), strokeWidth = 3.5f, cap = StrokeCap.Round)
+      drawLine(Color.White, Offset(cx - 5f, cy - 6f), Offset(cx - 8f, cy - 14f), strokeWidth = 3.5f, cap = StrokeCap.Round)
+      // Rodaja de naranja en el borde
+      drawCircle(Color(0xFFFFB74D), radius = 7f, center = Offset(cx + 10f, cy))
+      drawCircle(Color(0xFFFF9800), radius = 7f, center = Offset(cx + 10f, cy), style = Stroke(width = 1.5f))
+    }
+
+    CapybaraDrink.STRAWBERRY_SMOOTHIE -> {
+      // Batido de fresa rosado con nata montada y fresita
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 14f, cy + 20f), size = Size(28f, 10f))
+      val glassPath = Path().apply {
+        moveTo(cx - 11f, cy)
+        lineTo(cx + 11f, cy)
+        lineTo(cx + 8f, cy + 24f)
+        lineTo(cx - 8f, cy + 24f)
+        close()
+      }
+      drawPath(glassPath, Color(0xFFFF80AB))
+      drawPath(glassPath, outline, style = Stroke(width = strokeW * 0.8f))
+      // Crema batida blanca en domo
+      drawCircle(Color.White, radius = 9f, center = Offset(cx, cy - 2f))
+      // Fresa encima
+      drawCircle(Color(0xFFFF1744), radius = 4f, center = Offset(cx + 3f, cy - 8f))
+      // Pajilla rosada
+      drawLine(Color(0xFFFF4081), Offset(cx - 3f, cy + 10f), Offset(cx - 9f, cy - 14f), strokeWidth = 3.5f, cap = StrokeCap.Round)
+    }
+
+    CapybaraDrink.CHOCOLATE_MILK -> {
+      // Leche con chocolate y pajilla barquillo
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 14f, cy + 20f), size = Size(28f, 10f))
+      val glassPath = Path().apply {
+        moveTo(cx - 10f, cy)
+        lineTo(cx + 10f, cy)
+        lineTo(cx + 8f, cy + 24f)
+        lineTo(cx - 8f, cy + 24f)
+        close()
+      }
+      drawPath(glassPath, Color(0xFF6D4C41))
+      drawPath(glassPath, outline, style = Stroke(width = strokeW * 0.8f))
+      // Nata y sirope
+      drawCircle(Color(0xFFFFF8E1), radius = 8f, center = Offset(cx, cy - 2f))
+      drawLine(Color(0xFF3E2723), Offset(cx - 4f, cy - 2f), Offset(cx + 4f, cy + 4f), strokeWidth = 2.5f)
+      // Barquillo / Pajilla
+      drawLine(Color(0xFFD7CCC8), Offset(cx - 2f, cy + 12f), Offset(cx - 8f, cy - 14f), strokeWidth = 4f, cap = StrokeCap.Round)
+    }
+
+    CapybaraDrink.LEMONADE -> {
+      // Limonada fresca amarilla con hojita de menta
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 14f, cy + 20f), size = Size(28f, 10f))
+      val glassPath = Path().apply {
+        moveTo(cx - 10f, cy)
+        lineTo(cx + 10f, cy)
+        lineTo(cx + 8f, cy + 24f)
+        lineTo(cx - 8f, cy + 24f)
+        close()
+      }
+      drawPath(glassPath, Color(0xFFFFEB3B).copy(alpha = 0.90f))
+      drawPath(glassPath, outline, style = Stroke(width = strokeW * 0.8f))
+      // Cubitos de hielo flotando
+      drawRect(Color.White.copy(alpha = 0.8f), topLeft = Offset(cx - 5f, cy + 4f), size = Size(5f, 5f))
+      drawRect(Color.White.copy(alpha = 0.8f), topLeft = Offset(cx + 2f, cy + 8f), size = Size(5f, 5f))
+      // Hoja de menta verde
+      drawCircle(Color(0xFF4CAF50), radius = 4f, center = Offset(cx + 7f, cy - 2f))
+      // Pajilla verde
+      drawLine(Color(0xFF00E676), Offset(cx - 2f, cy + 14f), Offset(cx - 8f, cy - 14f), strokeWidth = 3.5f, cap = StrokeCap.Round)
+    }
+
+    CapybaraDrink.TROPICAL_COCO -> {
+      // Coco tropical refrescante con pajilla y sombrillita de papel
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 16f, cy + 18f), size = Size(32f, 10f))
+      val cocoHalf = Path().apply {
+        moveTo(cx - 14f, cy + 2f)
+        cubicTo(cx - 16f, cy + 24f, cx + 16f, cy + 24f, cx + 14f, cy + 2f)
+        close()
+      }
+      drawPath(cocoHalf, Color(0xFF5D4037))
+      drawPath(cocoHalf, outline, style = Stroke(width = strokeW * 0.8f))
+      // Interior blanco de coco y líquido
+      drawOval(Color(0xFFFFF9E6), topLeft = Offset(cx - 13f, cy), size = Size(26f, 8f))
+      drawOval(outline, topLeft = Offset(cx - 13f, cy), size = Size(26f, 8f), style = Stroke(width = 1.5f))
+      // Sombrillita de papel tropical (amarilla y rosa)
+      val umbrella = Path().apply {
+        moveTo(cx + 2f, cy - 14f)
+        lineTo(cx + 18f, cy - 8f)
+        lineTo(cx + 8f, cy - 2f)
+        close()
+      }
+      drawPath(umbrella, Color(0xFFFF4081))
+      drawLine(Color(0xFFFFEB3B), Offset(cx + 2f, cy - 14f), Offset(cx + 10f, cy + 2f), strokeWidth = 2f)
+      // Pajilla curva azul
+      val strawPath = Path().apply {
+        moveTo(cx - 4f, cy + 6f)
+        lineTo(cx - 8f, cy - 10f)
+        lineTo(cx - 16f, cy - 14f)
+      }
+      drawPath(strawPath, Color(0xFF00E5FF), style = Stroke(width = 3.5f, cap = StrokeCap.Round))
+      // Flor hawaiana decorativa
+      drawCircle(Color(0xFFFF5252), radius = 4f, center = Offset(cx - 10f, cy + 2f))
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// MEDIOS DE TRANSPORTE Y VEHÍCULOS
+// -------------------------------------------------------------
+private fun DrawScope.drawVehicle(
+  vehicle: CapybaraVehicle,
+  cx: Float,
+  cy: Float,
+  outline: Color,
+  strokeW: Float
+) {
+  when (vehicle) {
+    CapybaraVehicle.NONE -> {}
+
+    CapybaraVehicle.BICYCLE -> {
+      // Bicicleta de paseo vintage menta/roja
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 42f, cy + 38f), size = Size(84f, 10f))
+      // Ruedas
+      val wheelRadius = 14f
+      val wheel1 = Offset(cx - 26f, cy + 28f)
+      val wheel2 = Offset(cx + 26f, cy + 28f)
+      drawCircle(Color(0xFF424242), radius = wheelRadius, center = wheel1, style = Stroke(width = 4f))
+      drawCircle(Color(0xFF424242), radius = wheelRadius, center = wheel2, style = Stroke(width = 4f))
+      drawCircle(Color(0xFFE0E0E0), radius = wheelRadius - 3f, center = wheel1)
+      drawCircle(Color(0xFFE0E0E0), radius = wheelRadius - 3f, center = wheel2)
+      // Radios
+      drawLine(Color.Gray, Offset(wheel1.x - 10f, wheel1.y), Offset(wheel1.x + 10f, wheel1.y), strokeWidth = 1f)
+      drawLine(Color.Gray, Offset(wheel1.x, wheel1.y - 10f), Offset(wheel1.x, wheel1.y + 10f), strokeWidth = 1f)
+      drawLine(Color.Gray, Offset(wheel2.x - 10f, wheel2.y), Offset(wheel2.x + 10f, wheel2.y), strokeWidth = 1f)
+      drawLine(Color.Gray, Offset(wheel2.x, wheel2.y - 10f), Offset(wheel2.x, wheel2.y + 10f), strokeWidth = 1f)
+      // Cuadro de bicicleta verde menta
+      val frameColor = Color(0xFF26A69A)
+      val bottomBracket = Offset(cx, cy + 28f)
+      val seatPos = Offset(cx - 10f, cy + 8f)
+      val handlePos = Offset(cx + 18f, cy + 4f)
+      drawLine(frameColor, wheel1, bottomBracket, strokeWidth = 3.5f)
+      drawLine(frameColor, bottomBracket, seatPos, strokeWidth = 3.5f)
+      drawLine(frameColor, bottomBracket, handlePos, strokeWidth = 3.5f)
+      drawLine(frameColor, seatPos, handlePos, strokeWidth = 3.5f)
+      drawLine(frameColor, handlePos, wheel2, strokeWidth = 3.5f)
+      drawLine(frameColor, seatPos, wheel1, strokeWidth = 3.5f)
+      // Sillín marrón
+      drawOval(Color(0xFF5D4037), topLeft = Offset(seatPos.x - 8f, seatPos.y - 4f), size = Size(16f, 6f))
+      // Manillar con timbre
+      drawLine(Color(0xFF757575), Offset(handlePos.x - 4f, handlePos.y - 6f), Offset(handlePos.x + 6f, handlePos.y - 6f), strokeWidth = 3f, cap = StrokeCap.Round)
+      // Cestita de mimbre delantera con flor
+      drawRoundRect(Color(0xFFD7CCC8), topLeft = Offset(handlePos.x + 2f, handlePos.y - 4f), size = Size(14f, 10f), cornerRadius = CornerRadius(2f, 2f))
+      drawCircle(Color(0xFFFF4081), radius = 3f, center = Offset(handlePos.x + 9f, handlePos.y))
+    }
+
+    CapybaraVehicle.SCOOTER -> {
+      // Patinete amarillo brillante con ruedas celestes
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 38f, cy + 38f), size = Size(76f, 10f))
+      // Ruedas
+      val w1 = Offset(cx - 24f, cy + 34f)
+      val w2 = Offset(cx + 24f, cy + 34f)
+      drawCircle(Color(0xFF00E5FF), radius = 8f, center = w1)
+      drawCircle(outline, radius = 8f, center = w1, style = Stroke(width = 2.5f))
+      drawCircle(Color(0xFF00E5FF), radius = 8f, center = w2)
+      drawCircle(outline, radius = 8f, center = w2, style = Stroke(width = 2.5f))
+      // Tabla / deck
+      val deck = Path().apply {
+        addRoundRect(RoundRect(Rect(cx - 26f, cy + 28f, cx + 22f, cy + 34f), CornerRadius(3f, 3f)))
+      }
+      drawPath(deck, Color(0xFFFFD600))
+      drawPath(deck, outline, style = Stroke(width = 2.5f))
+      // Poste y manillar
+      drawLine(Color(0xFFFF6D00), Offset(cx + 20f, cy + 30f), Offset(cx + 16f, cy + 2f), strokeWidth = 4f, cap = StrokeCap.Round)
+      drawLine(Color(0xFFFFD600), Offset(cx + 8f, cy + 2f), Offset(cx + 24f, cy + 2f), strokeWidth = 4f, cap = StrokeCap.Round)
+      drawCircle(Color(0xFFFF1744), radius = 3.5f, center = Offset(cx + 23f, cy + 2f))
+    }
+
+    CapybaraVehicle.MOTORCYCLE -> {
+      // Motoneta scooter estilo Vespa retro celeste pastel
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 44f, cy + 38f), size = Size(88f, 12f))
+      // Ruedas gruesas
+      val mw1 = Offset(cx - 24f, cy + 30f)
+      val mw2 = Offset(cx + 24f, cy + 30f)
+      drawCircle(Color(0xFF37474F), radius = 12f, center = mw1)
+      drawCircle(Color.White, radius = 6f, center = mw1)
+      drawCircle(Color(0xFF37474F), radius = 12f, center = mw2)
+      drawCircle(Color.White, radius = 6f, center = mw2)
+      // Carrocería curva retro
+      val bodyPath = Path().apply {
+        moveTo(cx - 30f, cy + 26f)
+        cubicTo(cx - 32f, cy + 6f, cx - 8f, cy + 6f, cx - 2f, cy + 20f)
+        lineTo(cx + 12f, cy + 24f)
+        cubicTo(cx + 16f, cy + 8f, cx + 26f, cy + 4f, cx + 26f, cy + 26f)
+        close()
+      }
+      drawPath(bodyPath, Color(0xFF4DD0E1))
+      drawPath(bodyPath, outline, style = Stroke(width = 3f))
+      // Asiento de cuero
+      drawRoundRect(Color(0xFF4E342E), topLeft = Offset(cx - 28f, cy + 6f), size = Size(24f, 8f), cornerRadius = CornerRadius(4f, 4f))
+      // Faro redondo delantero
+      drawCircle(Color(0xFFFFF59D), radius = 5f, center = Offset(cx + 28f, cy + 8f))
+      drawCircle(outline, radius = 5f, center = Offset(cx + 28f, cy + 8f), style = Stroke(width = 2f))
+      // Espejo retrovisor
+      drawLine(Color(0xFF90A4AE), Offset(cx + 20f, cy + 4f), Offset(cx + 22f, cy - 6f), strokeWidth = 2f)
+      drawCircle(Color(0xFFCFD8DC), radius = 3.5f, center = Offset(cx + 22f, cy - 6f))
+    }
+
+    CapybaraVehicle.CAR -> {
+      // Mini auto descapotable rojo deportivo estilo cartoon
+      drawOval(Color(0x28000000), topLeft = Offset(cx - 52f, cy + 38f), size = Size(104f, 14f))
+      // Ruedas con llantas plateadas
+      val cw1 = Offset(cx - 30f, cy + 32f)
+      val cw2 = Offset(cx + 30f, cy + 32f)
+      drawCircle(Color(0xFF212121), radius = 11f, center = cw1)
+      drawCircle(Color(0xFFECEFF1), radius = 5f, center = cw1)
+      drawCircle(Color(0xFF212121), radius = 11f, center = cw2)
+      drawCircle(Color(0xFFECEFF1), radius = 5f, center = cw2)
+      // Chasis de carro descapotable
+      val carBody = Path().apply {
+        moveTo(cx - 44f, cy + 30f)
+        cubicTo(cx - 46f, cy + 14f, cx - 28f, cy + 12f, cx - 18f, cy + 12f)
+        lineTo(cx + 10f, cy + 12f)
+        cubicTo(cx + 24f, cy + 12f, cx + 42f, cy + 18f, cx + 44f, cy + 30f)
+        close()
+      }
+      drawPath(carBody, Color(0xFFE53935))
+      drawPath(carBody, outline, style = Stroke(width = 3f))
+      // Parabrisas celeste transparente
+      val windshield = Path().apply {
+        moveTo(cx + 4f, cy + 12f)
+        lineTo(cx + 18f, cy + 12f)
+        lineTo(cx + 12f, cy - 4f)
+        lineTo(cx + 2f, cy - 4f)
+        close()
+      }
+      drawPath(windshield, Color(0xFF80D8FF).copy(alpha = 0.65f))
+      drawPath(windshield, outline, style = Stroke(width = 2f))
+      // Volante
+      drawCircle(Color(0xFF424242), radius = 4f, center = Offset(cx + 8f, cy + 6f), style = Stroke(width = 2f))
+      // Faro delantero amarillo
+      drawCircle(Color(0xFFFFEE58), radius = 4.5f, center = Offset(cx + 42f, cy + 22f))
+      // Parachoques cromado
+      drawRoundRect(Color(0xFFCFD8DC), topLeft = Offset(cx + 40f, cy + 28f), size = Size(8f, 5f), cornerRadius = CornerRadius(2f, 2f))
+    }
   }
 }
 

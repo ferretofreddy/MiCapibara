@@ -40,6 +40,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,6 +58,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -64,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.audio.CartoonSounds
+import com.example.data.ProgressStore
 import com.example.model.CapybaraState
 import com.example.ui.components.CapybaraCanvas
 import com.example.ui.components.CelebrationConfetti
@@ -79,7 +82,13 @@ fun CapybaraShowcaseScreen(
   onEditAgain: () -> Unit,
   onResetNew: () -> Unit
 ) {
-  var petCount by remember { mutableIntStateOf(state.happinessCount) }
+  val context = LocalContext.current
+  val progressStore = remember { ProgressStore(context) }
+  var totalPets by remember { mutableIntStateOf(progressStore.getTotalPets()) }
+  var currentLevel by remember { mutableIntStateOf(progressStore.getLevel()) }
+  var showLevelUpDialog by remember { mutableStateOf(false) }
+  var newLevelReached by remember { mutableIntStateOf(1) }
+
   var isBouncing by remember { mutableStateOf(false) }
   var showPhotoCard by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
@@ -95,7 +104,16 @@ fun CapybaraShowcaseScreen(
 
   fun petCapybara() {
     CartoonSounds.playPop()
-    petCount++
+    val levelResult = progressStore.incrementPet()
+    totalPets = levelResult.totalPets
+    currentLevel = levelResult.currentLevel
+
+    if (levelResult.leveledUp) {
+      CartoonSounds.playDing()
+      newLevelReached = levelResult.currentLevel
+      showLevelUpDialog = true
+    }
+
     isBouncing = true
     coroutineScope.launch {
       delay(900)
@@ -115,7 +133,7 @@ fun CapybaraShowcaseScreen(
         .scale(scaleAnim)
     ) {
       CapybaraCanvas(
-        state = state.copy(isHappy = isBouncing || petCount > 3),
+        state = state.copy(isHappy = isBouncing || totalPets > 3),
         onPet = { petCapybara() }
       )
     }
@@ -123,7 +141,18 @@ fun CapybaraShowcaseScreen(
     // 2. EFECTO DE CONFETI CELEBRATORIO
     CelebrationConfetti(modifier = Modifier.fillMaxSize())
 
-    // 3. BARRA SUPERIOR CON TÍTULO CELEBRATORIO
+    // 3. BARRA SUPERIOR CON TÍTULO CELEBRATORIO E INDICADOR DE NIVEL
+    val nextThreshold = ProgressStore.getNextLevelThreshold(currentLevel)
+    val prevThreshold = ProgressStore.getPrevLevelThreshold(currentLevel)
+    val progressFraction = if (nextThreshold != null) {
+      val span = nextThreshold - prevThreshold
+      val currentInSpan = (totalPets - prevThreshold).coerceIn(0, span)
+      (currentInSpan.toFloat() / span.toFloat()).coerceIn(0f, 1f)
+    } else {
+      1f
+    }
+    val remainingToNext = if (nextThreshold != null) (nextThreshold - totalPets).coerceAtLeast(0) else 0
+
     Column(
       modifier = Modifier
         .fillMaxWidth()
@@ -174,29 +203,55 @@ fun CapybaraShowcaseScreen(
 
       Spacer(modifier = Modifier.height(10.dp))
 
-      // Indicador de caricias
+      // Indicador de nivel y progreso de caricias
       Surface(
         onClick = { petCapybara() },
         color = Color(0xFFFF4081).copy(alpha = 0.95f),
         shape = RoundedCornerShape(20.dp),
         shadowElevation = 6.dp
       ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp)
+        Column(
+          modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-          Icon(
-            imageVector = Icons.Default.Favorite,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(18.dp)
-          )
-          Text(
-            text = "¡$petCount caricias de amor!",
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            color = Color.White
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            Surface(
+              color = Color(0xFFFFD54F),
+              shape = CircleShape
+            ) {
+              Text(
+                text = "Nvl $currentLevel ⭐",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Black,
+                color = Color(0xFF4A2810),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+              )
+            }
+
+            Text(
+              text = if (nextThreshold != null) {
+                "🐾 $totalPets caricias (Faltan $remainingToNext 💖)"
+              } else {
+                "👑 ¡Nivel Máximo! ($totalPets 💖)"
+              },
+              fontWeight = FontWeight.Bold,
+              fontSize = 13.sp,
+              color = Color.White
+            )
+          }
+
+          LinearProgressIndicator(
+            progress = { progressFraction },
+            modifier = Modifier
+              .width(160.dp)
+              .height(6.dp)
+              .clip(RoundedCornerShape(3.dp)),
+            color = Color(0xFFFFD54F),
+            trackColor = Color.White.copy(alpha = 0.4f)
           )
         }
       }
@@ -388,6 +443,70 @@ fun CapybaraShowcaseScreen(
                 text = "¡Qué lindo!",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp
+              )
+            }
+          }
+        }
+      }
+    }
+
+    // 6. DIÁLOGO DE SUBIDA DE NIVEL EN MODO EXHIBICIÓN
+    if (showLevelUpDialog) {
+      Dialog(onDismissRequest = { showLevelUpDialog = false }) {
+        Box(
+          modifier = Modifier
+            .fillMaxWidth(0.92f)
+            .clip(RoundedCornerShape(28.dp))
+            .background(Color.White)
+            .border(4.dp, Color(0xFFFFD54F), RoundedCornerShape(28.dp))
+        ) {
+          CelebrationConfetti(modifier = Modifier.matchParentSize())
+
+          Column(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+          ) {
+            Surface(
+              color = Color(0xFFFFD54F),
+              shape = CircleShape,
+              modifier = Modifier.size(70.dp),
+              shadowElevation = 4.dp
+            ) {
+              Box(contentAlignment = Alignment.Center) {
+                Text(text = "⭐", fontSize = 36.sp)
+              }
+            }
+
+            Text(
+              text = "¡Nivel $newLevelReached Alcanzado!",
+              fontSize = 22.sp,
+              fontWeight = FontWeight.Black,
+              color = Color(0xFF4A2810),
+              textAlign = TextAlign.Center
+            )
+
+            Text(
+              text = "¡${state.name} te adora! 💕\n¡Sigue dándole cariño para subir más niveles!",
+              fontSize = 14.sp,
+              fontWeight = FontWeight.Medium,
+              color = Color(0xFF5D4037),
+              textAlign = TextAlign.Center
+            )
+
+            Button(
+              onClick = { showLevelUpDialog = false },
+              colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6D00)),
+              shape = RoundedCornerShape(20.dp),
+              modifier = Modifier.padding(top = 6.dp)
+            ) {
+              Text(
+                text = "¡Genial! ✨",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
               )
             }
           }
