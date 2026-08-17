@@ -1,0 +1,6 @@
+{
+  "name": "Mi Capibara",
+  "description": "Juego infantil para personalizar y vestir tu capibara en estilo dibujo animado con colores vivos, gorros, ropa, gafas, zapatos y paisajes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
