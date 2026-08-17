@@ -70,6 +70,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.audio.CartoonSounds
 import com.example.model.CapybaraBackground
 import com.example.model.CapybaraColor
 import com.example.model.CapybaraGlasses
@@ -79,6 +80,7 @@ import com.example.model.CapybaraShoes
 import com.example.model.CapybaraState
 import com.example.model.CustomizationCategory
 import com.example.ui.components.CapybaraCanvas
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -93,9 +95,10 @@ fun CapybaraCustomizerScreen(
   var selectedCategory by remember { mutableStateOf(CustomizationCategory.COLOR) }
   var isPetting by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
+  var reactionJob by remember { mutableStateOf<Job?>(null) }
 
   val petScale by animateFloatAsState(
-    targetValue = if (isPetting) 1.06f else 1f,
+    targetValue = if (isPetting) 1.08f else 1f,
     animationSpec = spring(
       dampingRatio = Spring.DampingRatioMediumBouncy,
       stiffness = Spring.StiffnessLow
@@ -103,7 +106,29 @@ fun CapybaraCustomizerScreen(
     label = "pet_bounce"
   )
 
+  fun triggerReaction(newState: CapybaraState, isColor: Boolean = false) {
+    if (isColor) {
+      CartoonSounds.playDing()
+    } else {
+      CartoonSounds.playPop()
+    }
+    isPetting = true
+    onStateChange(
+      newState.copy(
+        isHappy = true,
+        happinessCount = state.happinessCount + 1
+      )
+    )
+    reactionJob?.cancel()
+    reactionJob = coroutineScope.launch {
+      delay(1000)
+      isPetting = false
+      onStateChange(newState.copy(isHappy = false))
+    }
+  }
+
   fun triggerPetting() {
+    CartoonSounds.playPop()
     isPetting = true
     onStateChange(
       state.copy(
@@ -111,14 +136,16 @@ fun CapybaraCustomizerScreen(
         happinessCount = state.happinessCount + 1
       )
     )
-    coroutineScope.launch {
-      delay(1200)
+    reactionJob?.cancel()
+    reactionJob = coroutineScope.launch {
+      delay(1000)
       isPetting = false
       onStateChange(state.copy(isHappy = false))
     }
   }
 
   fun randomizeAll() {
+    CartoonSounds.playDing()
     val randomColor = CapybaraColor.values().random()
     val randomHat = CapybaraHat.values().random()
     val randomShirt = CapybaraShirt.values().random()
@@ -127,18 +154,25 @@ fun CapybaraCustomizerScreen(
     val randomBg = CapybaraBackground.values().random()
     val cuteNames = listOf("Capi", "Pelusa", "Brisa", "Choco", "Galleta", "Copito", "Lulu", "Pompón", "Chispita")
     
-    onStateChange(
-      state.copy(
-        color = randomColor,
-        hat = randomHat,
-        shirt = randomShirt,
-        glasses = randomGlasses,
-        shoes = randomShoes,
-        background = randomBg,
-        name = cuteNames.random()
-      )
+    val randomized = state.copy(
+      color = randomColor,
+      hat = randomHat,
+      shirt = randomShirt,
+      glasses = randomGlasses,
+      shoes = randomShoes,
+      background = randomBg,
+      name = cuteNames.random(),
+      isHappy = true,
+      happinessCount = state.happinessCount + 1
     )
-    triggerPetting()
+    isPetting = true
+    onStateChange(randomized)
+    reactionJob?.cancel()
+    reactionJob = coroutineScope.launch {
+      delay(1000)
+      isPetting = false
+      onStateChange(randomized.copy(isHappy = false))
+    }
   }
 
   Scaffold(
@@ -388,42 +422,42 @@ fun CapybaraCustomizerScreen(
           CustomizationCategory.COLOR -> {
             ColorSelectorSection(
               selectedColor = state.color,
-              onColorSelect = { onStateChange(state.copy(color = it)) }
+              onColorSelect = { triggerReaction(state.copy(color = it), isColor = true) }
             )
           }
 
           CustomizationCategory.HAT -> {
             HatSelectorSection(
               selectedHat = state.hat,
-              onHatSelect = { onStateChange(state.copy(hat = it)) }
+              onHatSelect = { triggerReaction(state.copy(hat = it), isColor = false) }
             )
           }
 
           CustomizationCategory.SHIRT -> {
             ShirtSelectorSection(
               selectedShirt = state.shirt,
-              onShirtSelect = { onStateChange(state.copy(shirt = it)) }
+              onShirtSelect = { triggerReaction(state.copy(shirt = it), isColor = false) }
             )
           }
 
           CustomizationCategory.GLASSES -> {
             GlassesSelectorSection(
               selectedGlasses = state.glasses,
-              onGlassesSelect = { onStateChange(state.copy(glasses = it)) }
+              onGlassesSelect = { triggerReaction(state.copy(glasses = it), isColor = false) }
             )
           }
 
           CustomizationCategory.SHOES -> {
             ShoesSelectorSection(
               selectedShoes = state.shoes,
-              onShoesSelect = { onStateChange(state.copy(shoes = it)) }
+              onShoesSelect = { triggerReaction(state.copy(shoes = it), isColor = false) }
             )
           }
 
           CustomizationCategory.BACKGROUND -> {
             BackgroundSelectorSection(
               selectedBg = state.background,
-              onBgSelect = { onStateChange(state.copy(background = it)) }
+              onBgSelect = { triggerReaction(state.copy(background = it), isColor = false) }
             )
           }
 

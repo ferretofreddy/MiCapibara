@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.audio.CartoonSounds
 import com.example.model.CapybaraState
 import com.example.ui.components.CapybaraCanvas
 import com.example.ui.components.CelebrationConfetti
@@ -91,6 +92,7 @@ fun CapybaraShowcaseScreen(
   )
 
   fun petCapybara() {
+    CartoonSounds.playPop()
     petCount++
     isBouncing = true
     coroutineScope.launch {
