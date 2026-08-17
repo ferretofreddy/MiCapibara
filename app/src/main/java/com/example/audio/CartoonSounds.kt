@@ -19,25 +19,28 @@ object CartoonSounds {
   private var activePlayJob: Job? = null
   private const val SAMPLE_RATE = 22050
 
+  private val dingData: ShortArray by lazy { generateDingSound() }
+  private val popData: ShortArray by lazy { generatePopSound() }
+
   /**
    * Sonido "Ding" brillante, dulce y agudo estilo campanita mágica para cuando cambia el color.
    */
   fun playDing() {
-    playSoundAsync { generateDingSound() }
+    playSoundAsync(dingData)
   }
 
   /**
    * Sonido "Pop" saltarín y caricaturesco con pitch ascendente rápido para prendas, accesorios y fondos.
    */
   fun playPop() {
-    playSoundAsync { generatePopSound() }
+    playSoundAsync(popData)
   }
 
-  private fun playSoundAsync(soundGenerator: () -> ShortArray) {
+  private fun playSoundAsync(audioData: ShortArray) {
     activePlayJob?.cancel()
     activePlayJob = soundScope.launch {
+      var audioTrack: AudioTrack? = null
       try {
-        val audioData = soundGenerator()
         val minBufferSize = AudioTrack.getMinBufferSize(
           SAMPLE_RATE,
           AudioFormat.CHANNEL_OUT_MONO,
@@ -46,7 +49,7 @@ object CartoonSounds {
         val bufferSize = audioData.size * 2
         val finalBufferSize = bufferSize.coerceAtLeast(minBufferSize)
 
-        val audioTrack = AudioTrack.Builder()
+        audioTrack = AudioTrack.Builder()
           .setAudioAttributes(
             AudioAttributes.Builder()
               .setUsage(AudioAttributes.USAGE_GAME)
@@ -67,14 +70,15 @@ object CartoonSounds {
         audioTrack.write(audioData, 0, audioData.size)
         audioTrack.play()
 
-        // Dejar que termine de reproducir antes de liberar recursos
-        val durationMs = (audioData.size * 1000L) / SAMPLE_RATE + 50L
+        val durationMs = (audioData.size * 1000L) / SAMPLE_RATE + 60L
         kotlinx.coroutines.delay(durationMs)
+      } catch (_: Exception) {
+      } finally {
         try {
-          audioTrack.stop()
-          audioTrack.release()
+          audioTrack?.stop()
+          audioTrack?.release()
         } catch (_: Exception) {}
-      } catch (_: Exception) {}
+      }
     }
   }
 
