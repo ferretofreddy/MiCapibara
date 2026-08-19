@@ -12,39 +12,39 @@ import com.example.model.CapybaraColor
 object SpriteResources {
 
   // Constantes de escenas principales
-  @DrawableRes
-  const val SCENE_LIVINGROOM: Int = R.drawable.scene_livingroom
+  @get:DrawableRes
+  val SCENE_LIVINGROOM: Int get() = R.drawable.scene_livingroom
 
-  @DrawableRes
-  const val SCENE_KITCHEN: Int = R.drawable.scene_kitchen
+  @get:DrawableRes
+  val SCENE_KITCHEN: Int get() = R.drawable.scene_kitchen
 
-  @DrawableRes
-  const val SCENE_BATH: Int = R.drawable.scene_bath
+  @get:DrawableRes
+  val SCENE_BATH: Int get() = R.drawable.scene_bath
 
-  @DrawableRes
-  const val SCENE_BEDROOM: Int = R.drawable.scene_bedroom
+  @get:DrawableRes
+  val SCENE_BEDROOM: Int get() = R.drawable.scene_bedroom
 
   // Constantes de comidas y pociones
-  @DrawableRes
-  const val FOOD_CAKE: Int = R.drawable.food_cake
+  @get:DrawableRes
+  val FOOD_CAKE: Int get() = R.drawable.food_cake
 
-  @DrawableRes
-  const val FOOD_COOKIE: Int = R.drawable.food_cookie
+  @get:DrawableRes
+  val FOOD_COOKIE: Int get() = R.drawable.food_cookie
 
-  @DrawableRes
-  const val FOOD_DONUT: Int = R.drawable.food_donut
+  @get:DrawableRes
+  val FOOD_DONUT: Int get() = R.drawable.food_donut
 
-  @DrawableRes
-  const val FOOD_ICECREAM: Int = R.drawable.food_icecream
+  @get:DrawableRes
+  val FOOD_ICECREAM: Int get() = R.drawable.food_icecream
 
-  @DrawableRes
-  const val FOOD_PIZZA: Int = R.drawable.food_pizza
+  @get:DrawableRes
+  val FOOD_PIZZA: Int get() = R.drawable.food_pizza
 
-  @DrawableRes
-  const val POTION_HEAL: Int = R.drawable.potion_heal
+  @get:DrawableRes
+  val POTION_HEAL: Int get() = R.drawable.potion_heal
 
-  @DrawableRes
-  const val CAPYBARA_HAPPY: Int = R.drawable.capybara_happy
+  @get:DrawableRes
+  val CAPYBARA_HAPPY: Int get() = R.drawable.capybara_happy
 
   /**
    * Obtiene el recurso drawable para un [CapybaraColor].

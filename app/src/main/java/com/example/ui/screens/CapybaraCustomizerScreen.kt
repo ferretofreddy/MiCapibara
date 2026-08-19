@@ -171,7 +171,9 @@ fun CapybaraCustomizerScreen(
     onStateChange(
       state.copy(
         isHappy = true,
-        happinessCount = state.happinessCount + 1
+        happinessCount = state.happinessCount + 1,
+        coins = levelResult.totalCoins,
+        xp = levelResult.currentXp
       )
     )
     reactionJob?.cancel()
@@ -705,7 +707,7 @@ fun CapybaraCustomizerScreen(
           )
 
           Text(
-            text = "¡Tu capibara está súper feliz con tus caricias! 💕\n¡Sigue dándole mucho cariño!",
+            text = "¡Tu capibara está súper feliz con tus caricias! 💕\n¡Has ganado +10 Monedas de Bonus! 🪙✨",
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             color = Color(0xFF5D4037),

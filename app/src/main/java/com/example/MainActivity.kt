@@ -19,7 +19,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.model.CapybaraState
 import com.example.ui.screens.CapybaraCustomizerScreen
 import com.example.ui.screens.CapybaraShowcaseScreen
+import com.example.ui.screens.HomeScreen
 import com.example.ui.theme.MyApplicationTheme
+
+enum class AppScreen {
+  HOME,
+  CUSTOMIZER,
+  SHOWCASE
+}
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,31 +43,43 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CapybaraApp() {
   var capyState by remember { mutableStateOf(CapybaraState()) }
-  var isShowcaseMode by remember { mutableStateOf(false) }
+  var currentScreen by remember { mutableStateOf(AppScreen.HOME) }
 
   AnimatedContent(
-    targetState = isShowcaseMode,
+    targetState = currentScreen,
     transitionSpec = {
       fadeIn() togetherWith fadeOut()
     },
     label = "screen_transition",
     modifier = Modifier.fillMaxSize()
-  ) { showFullScreen ->
-    if (showFullScreen) {
-      CapybaraShowcaseScreen(
-        state = capyState,
-        onEditAgain = { isShowcaseMode = false },
-        onResetNew = {
-          capyState = CapybaraState()
-          isShowcaseMode = false
-        }
-      )
-    } else {
-      CapybaraCustomizerScreen(
-        state = capyState,
-        onStateChange = { capyState = it },
-        onDone = { isShowcaseMode = true }
-      )
+  ) { screen ->
+    when (screen) {
+      AppScreen.HOME -> {
+        HomeScreen(
+          state = capyState,
+          onStateChange = { capyState = it },
+          onOpenCustomizer = { currentScreen = AppScreen.CUSTOMIZER }
+        )
+      }
+
+      AppScreen.CUSTOMIZER -> {
+        CapybaraCustomizerScreen(
+          state = capyState,
+          onStateChange = { capyState = it },
+          onDone = { currentScreen = AppScreen.HOME }
+        )
+      }
+
+      AppScreen.SHOWCASE -> {
+        CapybaraShowcaseScreen(
+          state = capyState,
+          onEditAgain = { currentScreen = AppScreen.CUSTOMIZER },
+          onResetNew = {
+            capyState = CapybaraState()
+            currentScreen = AppScreen.HOME
+          }
+        )
+      }
     }
   }
 }

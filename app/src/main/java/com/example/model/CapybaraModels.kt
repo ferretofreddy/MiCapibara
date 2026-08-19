@@ -254,5 +254,25 @@ data class CapybaraState(
   val vehicle: CapybaraVehicle = CapybaraVehicle.NONE,
   val background: CapybaraBackground = CapybaraBackground.MEADOW,
   val isHappy: Boolean = false,
-  val happinessCount: Int = 1
+  val happinessCount: Int = 1,
+  val coins: Int = 0,
+  val xp: Int = 0,
+  val foodInventory: List<String> = emptyList(),
+  val hunger: Int = 100,
+  val hygiene: Int = 100,
+  val energy: Int = 100,
+  val funLevel: Int = 100
 )
+
+/**
+ * Estado emocional o de necesidad del capibara
+ */
+enum class CapybaraMood {
+  HAPPY,
+  HUNGRY,
+  DIRTY,
+  TIRED,
+  SAD,
+  SICK
+}
+
