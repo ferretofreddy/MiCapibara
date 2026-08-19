@@ -44,7 +44,52 @@ object SpriteResources {
   val POTION_HEAL: Int get() = R.drawable.potion_heal
 
   @get:DrawableRes
+  val FRUIT_APPLE: Int get() = R.drawable.fruit_apple
+
+  @get:DrawableRes
+  val FRUIT_BANANA: Int get() = R.drawable.fruit_banana
+
+  @get:DrawableRes
+  val FRUIT_COCONUT: Int get() = R.drawable.fruit_coconut
+
+  @get:DrawableRes
+  val FRUIT_ORANGE: Int get() = R.drawable.fruit_orange
+
+  @get:DrawableRes
+  val FRUIT_PEACH: Int get() = R.drawable.fruit_peach
+
+  @get:DrawableRes
+  val FRUIT_PINEAPPLE: Int get() = R.drawable.fruit_pineapple
+
+  @get:DrawableRes
+  val FRUIT_STRAWBERRY: Int get() = R.drawable.fruit_strawberry
+
+  @get:DrawableRes
+  val FRUIT_WATERMELON: Int get() = R.drawable.fruit_watermelon
+
+  @get:DrawableRes
   val CAPYBARA_HAPPY: Int get() = R.drawable.capybara_happy
+
+  @DrawableRes
+  fun getFoodDrawable(foodId: String): Int {
+    return when (foodId) {
+      "fruit_apple" -> R.drawable.fruit_apple
+      "fruit_banana" -> R.drawable.fruit_banana
+      "fruit_coconut" -> R.drawable.fruit_coconut
+      "fruit_orange" -> R.drawable.fruit_orange
+      "fruit_peach" -> R.drawable.fruit_peach
+      "fruit_pineapple" -> R.drawable.fruit_pineapple
+      "fruit_strawberry" -> R.drawable.fruit_strawberry
+      "fruit_watermelon" -> R.drawable.fruit_watermelon
+      "food_pizza" -> R.drawable.food_pizza
+      "food_donut" -> R.drawable.food_donut
+      "food_icecream" -> R.drawable.food_icecream
+      "food_cookie" -> R.drawable.food_cookie
+      "food_cake" -> R.drawable.food_cake
+      "potion_heal" -> R.drawable.potion_heal
+      else -> R.drawable.fruit_apple
+    }
+  }
 
   /**
    * Obtiene el recurso drawable para un [CapybaraColor].

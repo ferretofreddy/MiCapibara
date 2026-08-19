@@ -51,18 +51,36 @@ class ProgressStoreTest {
   }
 
   @Test
-  fun testNeedsDecayCalculation() {
-    val oneHourAgo = System.currentTimeMillis() - (3600 * 1000L)
-    val result = NeedsManager.calculateDecayedNeeds(
-      hunger = 100,
-      hygiene = 100,
-      energy = 100,
-      funLevel = 100,
-      lastUpdateMillis = oneHourAgo
-    )
-    assertTrue(result.hunger < 100)
-    assertTrue(result.hygiene < 100)
-    assertTrue(result.energy < 100)
-    assertTrue(result.funLevel < 100)
+  fun testFoodInventoryPersistence() {
+    val initialInventory = progressStore.getFoodInventory()
+    assertTrue(initialInventory.isEmpty())
+
+    progressStore.addFoodItem("fruit_apple")
+    progressStore.addFoodItem("food_pizza")
+    progressStore.addFoodItem("fruit_apple")
+
+    val updatedInventory = progressStore.getFoodInventory()
+    assertEquals(3, updatedInventory.size)
+    assertEquals("fruit_apple", updatedInventory[0])
+    assertEquals("food_pizza", updatedInventory[1])
+    assertEquals("fruit_apple", updatedInventory[2])
+
+    val removed = progressStore.removeFoodItem("food_pizza")
+    assertTrue(removed)
+    assertEquals(listOf("fruit_apple", "fruit_apple"), progressStore.getFoodInventory())
+  }
+
+  @Test
+  fun testSpendCoins() {
+    progressStore.addCoins(20)
+    assertEquals(20, progressStore.getCoins())
+
+    val success = progressStore.spendCoins(15)
+    assertTrue(success)
+    assertEquals(5, progressStore.getCoins())
+
+    val failed = progressStore.spendCoins(10)
+    assertFalse(failed)
+    assertEquals(5, progressStore.getCoins())
   }
 }

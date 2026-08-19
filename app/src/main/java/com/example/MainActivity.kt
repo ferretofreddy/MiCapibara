@@ -20,12 +20,14 @@ import com.example.model.CapybaraState
 import com.example.ui.screens.CapybaraCustomizerScreen
 import com.example.ui.screens.CapybaraShowcaseScreen
 import com.example.ui.screens.HomeScreen
+import com.example.ui.screens.ShopScreen
 import com.example.ui.theme.MyApplicationTheme
 
 enum class AppScreen {
   HOME,
   CUSTOMIZER,
-  SHOWCASE
+  SHOWCASE,
+  SHOP
 }
 
 class MainActivity : ComponentActivity() {
@@ -58,7 +60,16 @@ fun CapybaraApp() {
         HomeScreen(
           state = capyState,
           onStateChange = { capyState = it },
-          onOpenCustomizer = { currentScreen = AppScreen.CUSTOMIZER }
+          onOpenCustomizer = { currentScreen = AppScreen.CUSTOMIZER },
+          onOpenShop = { currentScreen = AppScreen.SHOP }
+        )
+      }
+
+      AppScreen.SHOP -> {
+        ShopScreen(
+          state = capyState,
+          onStateChange = { capyState = it },
+          onBack = { currentScreen = AppScreen.HOME }
         )
       }
 

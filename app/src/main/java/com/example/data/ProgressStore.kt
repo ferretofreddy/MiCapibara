@@ -28,6 +28,7 @@ class ProgressStore(context: Context) {
     private const val KEY_FUN = "key_fun"
     private const val KEY_LAST_UPDATE_TIME = "key_last_update_time"
     private const val KEY_FOOD_INVENTORY = "key_food_inventory"
+    private const val KEY_FOOD_INVENTORY_CSV = "key_food_inventory_csv"
 
     const val CURRENT_SCHEMA_VERSION = 3
 
@@ -127,8 +128,16 @@ class ProgressStore(context: Context) {
 
   fun addCoins(amount: Int): Int {
     val newCoins = (getCoins() + amount).coerceAtLeast(0)
-    prefs.edit().putInt(KEY_COINS, newCoins).apply()
+    prefs.edit().putInt(KEY_COINS, newCoins).commit()
     return newCoins
+  }
+
+  fun spendCoins(amount: Int): Boolean {
+    val current = getCoins()
+    if (current < amount) return false
+    val newCoins = current - amount
+    prefs.edit().putInt(KEY_COINS, newCoins).commit()
+    return true
   }
 
   fun getXp(): Int {
@@ -173,20 +182,32 @@ class ProgressStore(context: Context) {
   }
 
   fun getFoodInventory(): List<String> {
+    val csv = prefs.getString(KEY_FOOD_INVENTORY_CSV, null)
+    if (csv != null) {
+      return if (csv.isBlank()) emptyList() else csv.split(",").filter { it.isNotBlank() }
+    }
     return prefs.getStringSet(KEY_FOOD_INVENTORY, emptySet())?.toList() ?: emptyList()
   }
 
   fun addFoodItem(itemKey: String) {
     val current = getFoodInventory().toMutableList()
     current.add(itemKey)
-    prefs.edit().putStringSet(KEY_FOOD_INVENTORY, current.toSet()).apply()
+    val csv = current.joinToString(",")
+    prefs.edit()
+      .putString(KEY_FOOD_INVENTORY_CSV, csv)
+      .putStringSet(KEY_FOOD_INVENTORY, current.toSet())
+      .commit()
   }
 
   fun removeFoodItem(itemKey: String): Boolean {
     val current = getFoodInventory().toMutableList()
     val removed = current.remove(itemKey)
     if (removed) {
-      prefs.edit().putStringSet(KEY_FOOD_INVENTORY, current.toSet()).apply()
+      val csv = current.joinToString(",")
+      prefs.edit()
+        .putString(KEY_FOOD_INVENTORY_CSV, csv)
+        .putStringSet(KEY_FOOD_INVENTORY, current.toSet())
+        .commit()
     }
     return removed
   }

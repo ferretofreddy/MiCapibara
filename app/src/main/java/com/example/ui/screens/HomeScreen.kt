@@ -104,6 +104,7 @@ fun HomeScreen(
   state: CapybaraState,
   onStateChange: (CapybaraState) -> Unit,
   onOpenCustomizer: () -> Unit,
+  onOpenShop: () -> Unit = {},
   modifier: Modifier = Modifier
 ) {
   val context = LocalContext.current
@@ -131,7 +132,11 @@ fun HomeScreen(
   var placeholderMessage by remember { mutableStateOf<String?>(null) }
   var placeholderJob by remember { mutableStateOf<Job?>(null) }
 
-  // Aplicar decaimiento de necesidades al abrir la pantalla
+  // Aplicar decaimiento de necesidades y sincronizar monedas al abrir o volver a la pantalla
+  LaunchedEffect(state.coins) {
+    coins = progressStore.getCoins()
+  }
+
   LaunchedEffect(Unit) {
     val decayed = progressStore.applyDecay()
     hunger = decayed.hunger
@@ -323,7 +328,7 @@ fun HomeScreen(
         onBathClick = { showPlaceholderBubble("Baño") },
         onSleepClick = { showPlaceholderBubble("Dormir") },
         onPlayClick = { showPlaceholderBubble("Jugar") },
-        onShopClick = { showPlaceholderBubble("Tienda") },
+        onShopClick = onOpenShop,
         onDressClick = onOpenCustomizer
       )
     }
